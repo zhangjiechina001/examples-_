@@ -43,13 +43,13 @@
 
 
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, QEasingCurve, QObject,
-        QParallelAnimationGroup, QPointF, QPropertyAnimation, qrand, QRectF,
-        QState, QStateMachine, Qt, QTimer)
+                          QParallelAnimationGroup, QPointF, QPropertyAnimation, qrand, QRectF,
+                          QState, QStateMachine, Qt, QTimer)
 from PyQt5.QtGui import (QBrush, QLinearGradient, QPainter, QPainterPath,
-        QPixmap)
+                         QPixmap)
 from PyQt5.QtWidgets import (QApplication, QGraphicsItem, QGraphicsPixmapItem,
-        QGraphicsRectItem, QGraphicsScene, QGraphicsView, QGraphicsWidget,
-        QStyle)
+                             QGraphicsRectItem, QGraphicsScene, QGraphicsView, QGraphicsWidget,
+                             QStyle)
 
 import animatedtiles_rc
 
@@ -86,24 +86,19 @@ class Button(QGraphicsWidget):
     def shape(self):
         path = QPainterPath()
         path.addEllipse(self.boundingRect())
-
         return path
 
     def paint(self, painter, option, widget):
+        print('paint')
         down = option.state & QStyle.State_Sunken
-        r = self.boundingRect()
 
-        grad = QLinearGradient(r.topLeft(), r.bottomRight())
-        if option.state & QStyle.State_MouseOver:
-            color_0 = Qt.white
-        else:
-            color_0 = Qt.lightGray
-
+        color_0 = Qt.white if option.state & QStyle.State_MouseOver else Qt.lightGray
         color_1 = Qt.darkGray
-
         if down:
-            color_0, color_1 = color_1, color_0
+            color_pen_0, color_1 = color_1, color_0
 
+        r = self.boundingRect()
+        grad = QLinearGradient(r.topLeft(), r.bottomRight())
         grad.setColorAt(0, color_0)
         grad.setColorAt(1, color_1)
 
@@ -111,14 +106,12 @@ class Button(QGraphicsWidget):
         painter.setBrush(grad)
         painter.drawEllipse(r)
 
-        color_0 = Qt.darkGray
-        color_1 = Qt.lightGray
-
+        color_pen_0 = Qt.darkGray
+        color_pen_1 = Qt.lightGray
         if down:
-            color_0, color_1 = color_1, color_0
-
-        grad.setColorAt(0, color_0)
-        grad.setColorAt(1, color_1)
+            color_pen_0, color_pen_1 = color_pen_1, color_pen_0
+        grad.setColorAt(0, color_pen_0)
+        grad.setColorAt(1, color_pen_1)
 
         painter.setPen(Qt.NoPen)
         painter.setBrush(grad)
@@ -127,8 +120,8 @@ class Button(QGraphicsWidget):
             painter.translate(2, 2)
 
         painter.drawEllipse(r.adjusted(5, 5, -5, -5))
-        painter.drawPixmap(-self._pix.width() / 2, -self._pix.height() / 2,
-                self._pix)
+        painter.drawPixmap(int(-self._pix.width() / 2), int(-self._pix.height() / 2),
+                           self._pix)
 
     def mousePressEvent(self, ev):
         self.pressed.emit()
@@ -154,16 +147,17 @@ if __name__ == '__main__':
     kineticPix = QPixmap(':/images/kinetic.png')
     bgPix = QPixmap(':/images/Time-For-Lunch-2.jpg')
 
-    scene = QGraphicsScene(-350, -350, 700, 700)
+    w,h=700,700
+    scene = QGraphicsScene(-w//2, -h//2, w, h)
 
     items = []
     for i in range(64):
         item = Pixmap(kineticPix)
         item.pixmap_item.setOffset(-kineticPix.width() / 2,
-                -kineticPix.height() / 2)
+                                   -kineticPix.height() / 2)
         item.pixmap_item.setZValue(i)
-        items.append(item)
         scene.addItem(item.pixmap_item)
+        items.append(item)
 
     # Buttons.
     buttonParent = QGraphicsRectItem()
@@ -182,7 +176,7 @@ if __name__ == '__main__':
     scene.addItem(buttonParent)
     buttonParent.setScale(0.75)
     buttonParent.setPos(200, 200)
-    buttonParent.setZValue(65)
+    buttonParent.setZValue(100)
 
     # States.
     rootState = QState()
@@ -192,26 +186,27 @@ if __name__ == '__main__':
     tiledState = QState(rootState)
     centeredState = QState(rootState)
 
+    calc_count = len(items) - 1
     # Values.
     for i, item in enumerate(items):
         # Ellipse.
         ellipseState.assignProperty(item, 'pos',
-                QPointF(math.cos((i / 63.0) * 6.28) * 250,
-                        math.sin((i / 63.0) * 6.28) * 250))
+                                    QPointF(math.cos((i / calc_count) * 6.28) * 250,
+                                            math.sin((i / calc_count) * 6.28) * 250))
 
         # Figure 8.
         figure8State.assignProperty(item, 'pos',
-                QPointF(math.sin((i / 63.0) * 6.28) * 250,
-                        math.sin(((i * 2)/63.0) * 6.28) * 250))
+                                    QPointF(math.sin((i / calc_count) * 6.28) * 250,
+                                            math.sin(((i * 2) / calc_count) * 6.28) * 250))
 
         # Random.
         randomState.assignProperty(item, 'pos',
-                QPointF(-250 + qrand() % 500, -250 + qrand() % 500))
+                                   QPointF(-250 + qrand() % 500, -250 + qrand() % 500))
 
         # Tiled.
         tiledState.assignProperty(item, 'pos',
-                QPointF(((i % 8) - 4) * kineticPix.width() + kineticPix.width() / 2,
-                        ((i // 8) - 4) * kineticPix.height() + kineticPix.height() / 2))
+                                  QPointF(((i % 8) - 4) * kineticPix.width() + kineticPix.width() / 2,
+                                          ((i // 8) - 4) * kineticPix.height() + kineticPix.height() / 2))
 
         # Centered.
         centeredState.assignProperty(item, 'pos', QPointF())
@@ -237,23 +232,14 @@ if __name__ == '__main__':
         anim.setEasingCurve(QEasingCurve.InOutBack)
         group.addAnimation(anim)
 
-    trans = rootState.addTransition(ellipseButton.pressed, ellipseState)
-    trans.addAnimation(group)
-
-    trans = rootState.addTransition(figure8Button.pressed, figure8State)
-    trans.addAnimation(group)
-
-    trans = rootState.addTransition(randomButton.pressed, randomState)
-    trans.addAnimation(group)
-
-    trans = rootState.addTransition(tiledButton.pressed, tiledState)
-    trans.addAnimation(group)
-
-    trans = rootState.addTransition(centeredButton.pressed, centeredState)
-    trans.addAnimation(group)
+    action_state = [(ellipseButton, ellipseState), (figure8Button, figure8State), (randomButton, randomState),
+                    (tiledButton, tiledState), (centeredButton, centeredState)]
+    for a, s in action_state:
+        trans = rootState.addTransition(a.pressed, s)
+        trans.addAnimation(group)
 
     timer = QTimer()
-    timer.start(125)
+    timer.start(1000)
     timer.setSingleShot(True)
     trans = rootState.addTransition(timer.timeout, ellipseState)
     trans.addAnimation(group)
