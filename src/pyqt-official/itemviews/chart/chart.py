@@ -45,12 +45,12 @@
 import math
 
 from PyQt5.QtCore import (QByteArray, QFile, QItemSelection,
-        QItemSelectionModel, QModelIndex, QPoint, QRect, QSize, Qt,
-        QTextStream)
+                          QItemSelectionModel, QModelIndex, QPoint, QRect, QSize, Qt,
+                          QTextStream)
 from PyQt5.QtGui import (QBrush, QColor, QFontMetrics, QPainter, QPainterPath,
-        QPalette, QPen, QRegion, QStandardItemModel)
+                         QPalette, QPen, QRegion, QStandardItemModel)
 from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QFileDialog,
-        QMainWindow, QMenu, QRubberBand, QSplitter, QStyle, QTableView)
+                             QMainWindow, QMenu, QRubberBand, QSplitter, QStyle, QTableView)
 
 import chart_rc
 
@@ -64,7 +64,7 @@ class PieView(QAbstractItemView):
 
         self.margin = 8
         self.totalSize = 300
-        self.pieSize = self.totalSize - 2*self.margin
+        self.pieSize = self.totalSize - 2 * self.margin
         self.validItems = 0
         self.totalValue = 0.0
         self.origin = QPoint()
@@ -102,17 +102,17 @@ class PieView(QAbstractItemView):
         wy = point.y() + self.verticalScrollBar().value()
 
         if wx < self.totalSize:
-            cx = wx - self.totalSize/2
-            cy = self.totalSize/2 - wy; # positive cy for items above the center
+            cx = wx - self.totalSize / 2
+            cy = self.totalSize / 2 - wy;  # positive cy for items above the center
 
             # Determine the distance from the center point of the pie chart.
-            d = (cx**2 + cy**2)**0.5
+            d = (cx ** 2 + cy ** 2) ** 0.5
 
-            if d == 0 or d > self.pieSize/2:
+            if d == 0 or d > self.pieSize / 2:
                 return QModelIndex()
 
             # Determine the angle of the point.
-            angle = (180 / math.pi) * math.acos(cx/d)
+            angle = (180 / math.pi) * math.acos(cx / d)
             if cy < 0:
                 angle = 360 - angle
 
@@ -125,7 +125,7 @@ class PieView(QAbstractItemView):
                 value = self.model().data(index)
 
                 if value > 0.0:
-                    sliceAngle = 360*value/self.totalValue
+                    sliceAngle = 360 * value / self.totalValue
 
                     if angle >= startAngle and angle < (startAngle + sliceAngle):
                         return self.model().index(row, 1, self.rootIndex())
@@ -170,15 +170,15 @@ class PieView(QAbstractItemView):
         if value is not None and value > 0.0:
 
             listItem = 0
-            for row in range(index.row()-1, -1, -1):
+            for row in range(index.row() - 1, -1, -1):
                 if self.model().data(self.model().index(row, 1, self.rootIndex())) > 0.0:
                     listItem += 1
 
             if index.column() == 0:
-            
+
                 itemHeight = QFontMetrics(self.viewOptions().font).height()
                 return QRect(self.totalSize,
-                             int(self.margin + listItem*itemHeight),
+                             int(self.margin + listItem * itemHeight),
                              self.totalSize - self.margin, int(itemHeight))
             elif index.column() == 1:
                 return self.viewport().rect()
@@ -202,14 +202,14 @@ class PieView(QAbstractItemView):
             value = self.model().data(sliceIndex)
 
             if value > 0.0:
-                angle = 360*value/self.totalValue
+                angle = 360 * value / self.totalValue
 
                 if sliceIndex == index:
                     slicePath = QPainterPath()
-                    slicePath.moveTo(self.totalSize/2, self.totalSize/2)
+                    slicePath.moveTo(self.totalSize / 2, self.totalSize / 2)
                     slicePath.arcTo(self.margin, self.margin,
-                            self.margin+self.pieSize, self.margin+self.pieSize,
-                            startAngle, angle)
+                                    self.margin + self.pieSize, self.margin + self.pieSize,
+                                    startAngle, angle)
                     slicePath.closeSubpath()
 
                     return QRegion(slicePath.toFillPolygon().toPolygon())
@@ -251,19 +251,19 @@ class PieView(QAbstractItemView):
 
             if current.row() > 0:
                 current = self.model().index(current.row() - 1,
-                        current.column(), self.rootIndex())
+                                             current.column(), self.rootIndex())
             else:
                 current = self.model().index(0, current.column(),
-                        self.rootIndex())
+                                             self.rootIndex())
 
         elif cursorAction in (QAbstractItemView.MoveRight, QAbstractItemView.MoveDown):
 
             if current.row() < self.rows(current) - 1:
                 current = self.model().index(current.row() + 1,
-                        current.column(), self.rootIndex())
+                                             current.column(), self.rootIndex())
             else:
                 current = self.model().index(self.rows(current) - 1,
-                        current.column(), self.rootIndex())
+                                             current.column(), self.rootIndex())
 
         self.viewport().update()
         return current
@@ -286,14 +286,14 @@ class PieView(QAbstractItemView):
 
         # Viewport rectangles
         pieRect = QRect(self.margin, self.margin, self.pieSize,
-                self.pieSize)
+                        self.pieSize)
         keyPoint = QPoint(self.totalSize - self.horizontalScrollBar().value(),
-                self.margin - self.verticalScrollBar().value())
+                          self.margin - self.verticalScrollBar().value())
 
         if self.validItems > 0:
             painter.save()
             painter.translate(pieRect.x() - self.horizontalScrollBar().value(),
-                    pieRect.y() - self.verticalScrollBar().value())
+                              pieRect.y() - self.verticalScrollBar().value())
             painter.drawEllipse(0, 0, self.pieSize, self.pieSize)
             startAngle = 0.0
 
@@ -303,7 +303,7 @@ class PieView(QAbstractItemView):
                 value = self.model().data(index)
 
                 if value > 0.0:
-                    angle = 360*value/self.totalValue
+                    angle = 360 * value / self.totalValue
 
                     colorIndex = self.model().index(row, 0, self.rootIndex())
                     color = self.model().data(colorIndex, Qt.DecorationRole)
@@ -316,7 +316,7 @@ class PieView(QAbstractItemView):
                         painter.setBrush(QBrush(color))
 
                     painter.drawPie(0, 0, self.pieSize, self.pieSize,
-                            int(startAngle*16), int(angle*16))
+                                    int(startAngle * 16), int(angle * 16))
 
                     startAngle += angle
 
@@ -397,7 +397,7 @@ class PieView(QAbstractItemView):
         # function to check for intersections.
 
         contentsRect = rect.translated(self.horizontalScrollBar().value(),
-                self.verticalScrollBar().value()).normalized()
+                                       self.verticalScrollBar().value()).normalized()
 
         rows = self.model().rowCount(self.rootIndex())
         columns = self.model().columnCount(self.rootIndex())
@@ -435,7 +435,7 @@ class PieView(QAbstractItemView):
 
     def updateGeometries(self):
         self.horizontalScrollBar().setPageStep(self.viewport().width())
-        self.horizontalScrollBar().setRange(0, max(0, 2*self.totalSize - self.viewport().width()))
+        self.horizontalScrollBar().setRange(0, max(0, 2 * self.totalSize - self.viewport().width()))
         self.verticalScrollBar().setPageStep(self.viewport().height())
         self.verticalScrollBar().setRange(0, max(0, self.totalSize - self.viewport().height()))
 
@@ -485,7 +485,7 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(fileMenu)
         self.statusBar()
 
-        self.openFile(':/Charts/qtdata.cht')
+        self.openFile('./qtdata.cht')
 
         self.setWindowTitle("Chart")
         self.resize(870, 550)
@@ -518,39 +518,26 @@ class MainWindow(QMainWindow):
     def openFile(self, path=None):
         if not path:
             path, _ = QFileDialog.getOpenFileName(self, "Choose a data file",
-                    '', '*.cht')
+                                                  '', '*.cht')
 
         if path:
-            f = QFile(path)
+            with open(path, 'r') as r:
+                lines = [l.replace('\n', '') for l in r.readlines()]
 
-            if f.open(QFile.ReadOnly | QFile.Text):
-                stream = QTextStream(f)
+            self.model.removeRows(0, self.model.rowCount())
+            for row, line in enumerate(lines):
+                self.model.insertRows(row, 1)
 
-                self.model.removeRows(0, self.model.rowCount(QModelIndex()),
-                        QModelIndex())
+                pieces = line.split(',')
+                self.model.setData(self.model.index(row, 0, QModelIndex()), pieces[0])
+                self.model.setData(self.model.index(row, 1, QModelIndex()),float(pieces[1]))
+                self.model.setData(self.model.index(row, 0, QModelIndex()),QColor(pieces[2]), Qt.DecorationRole)
 
-                row = 0
-                line = stream.readLine()
-                while line:
-                    self.model.insertRows(row, 1, QModelIndex())
-
-                    pieces = line.split(',')
-                    self.model.setData(self.model.index(row, 0, QModelIndex()),
-                                pieces[0])
-                    self.model.setData(self.model.index(row, 1, QModelIndex()),
-                                float(pieces[1]))
-                    self.model.setData(self.model.index(row, 0, QModelIndex()),
-                                QColor(pieces[2]), Qt.DecorationRole)
-
-                    row += 1
-                    line = stream.readLine()
-
-                f.close()
-                self.statusBar().showMessage("Loaded %s" % path, 2000)
+            self.statusBar().showMessage("Loaded %s" % path, 2000)
 
     def saveFile(self):
         fileName, _ = QFileDialog.getSaveFileName(self, "Save file as", '',
-                '*.cht')
+                                                  '*.cht')
 
         if fileName:
             f = QFile(fileName)
@@ -560,17 +547,17 @@ class MainWindow(QMainWindow):
                     pieces = []
 
                     pieces.append(
-                            self.model.data(
-                                    self.model.index(row, 0, QModelIndex()),
-                                    Qt.DisplayRole))
+                        self.model.data(
+                            self.model.index(row, 0, QModelIndex()),
+                            Qt.DisplayRole))
                     pieces.append(
-                            '%g' % self.model.data(
-                                    self.model.index(row, 1, QModelIndex()),
-                                    Qt.DisplayRole))
+                        '%g' % self.model.data(
+                            self.model.index(row, 1, QModelIndex()),
+                            Qt.DisplayRole))
                     pieces.append(
-                            self.model.data(
-                                    self.model.index(row, 0, QModelIndex()),
-                                    Qt.DecorationRole).name())
+                        self.model.data(
+                            self.model.index(row, 0, QModelIndex()),
+                            Qt.DecorationRole).name())
 
                     f.write(b','.join([p.encode('utf-8') for p in pieces]))
                     f.write(b'\n')
@@ -580,7 +567,6 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-
     import sys
 
     app = QApplication(sys.argv)
